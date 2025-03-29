@@ -15,6 +15,7 @@
             --nav-btn-color: #5d4c3a;
             --page-edge-color: #e8d9b5;
             --book-spine-color: #3a3226;
+            --typing-speed: 30ms;
         }
 
         .night-mode {
@@ -131,6 +132,12 @@
             font-size: 14px;
             color: var(--text-color);
             opacity: 0.7;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .page-number:hover {
+            text-decoration: underline;
         }
 
         .page-cover {
@@ -272,6 +279,14 @@
 
         .home-btn::after {
             content: "⌂";
+        }
+
+        .resume-btn::after {
+            content: "↻";
+        }
+
+        .progress-btn::after {
+            content: "➔";
         }
 
         .toc-panel {
@@ -442,6 +457,152 @@
             pointer-events: none;
         }
 
+        /* Page edge click areas */
+        .page-left-edge {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 20%;
+            height: 100%;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23ffffff" d="M15.41 16.58L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.42z"/></svg>'), auto;
+            z-index: 20;
+        }
+
+        .page-right-edge {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 20%;
+            height: 100%;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23ffffff" d="M8.59 16.58L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.42z"/></svg>'), auto;
+            z-index: 20;
+        }
+
+        /* Progress bar */
+        .progress-container {
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 600px;
+            height: 6px;
+            background-color: rgba(58, 50, 38, 0.2);
+            border-radius: 3px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--nav-btn-color);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        /* Page jump modal */
+        .page-jump-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--page-color);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            z-index: 3000;
+            display: none;
+        }
+
+        .page-jump-modal h3 {
+            margin-bottom: 15px;
+        }
+
+        .page-jump-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid var(--nav-btn-color);
+            border-radius: 5px;
+            font-family: inherit;
+            font-size: 16px;
+        }
+
+        .page-jump-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .page-jump-button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: var(--nav-btn-color);
+            color: var(--highlight-color);
+            cursor: pointer;
+        }
+
+        .page-jump-button.cancel {
+            background-color: #ccc;
+            color: #333;
+        }
+
+        /* Settings panel */
+        .settings-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--page-color);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            z-index: 3000;
+            display: none;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .settings-panel h3 {
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--nav-btn-color);
+            padding-bottom: 10px;
+        }
+
+        .setting-item {
+            margin-bottom: 15px;
+        }
+
+        .setting-item label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .setting-item input[type="range"] {
+            width: 100%;
+        }
+
+        .settings-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .settings-button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: var(--nav-btn-color);
+            color: var(--highlight-color);
+            cursor: pointer;
+        }
+
+        .settings-button.cancel {
+            background-color: #ccc;
+            color: #333;
+        }
+
         @media (max-width: 768px) {
             .book-container {
                 width: 100%;
@@ -475,6 +636,11 @@
             .page::after {
                 width: 15px;
             }
+
+            .progress-container {
+                bottom: 60px;
+                width: 90%;
+            }
         }
 
         /* Accessibility focus styles */
@@ -496,6 +662,8 @@
 
             <!-- Example Pages -->
             <div class="page" id="page1">
+                <div class="page-left-edge"></div>
+                <div class="page-right-edge"></div>
                 <div class="page-corner"></div>
                 <div class="loading-parchment"></div>
                 <div class="page-content" data-typing>
@@ -507,6 +675,8 @@
             </div>
 
             <div class="page" id="page2">
+                <div class="page-left-edge"></div>
+                <div class="page-right-edge"></div>
                 <div class="page-corner"></div>
                 <div class="loading-parchment"></div>
                 <div class="page-content" data-typing>
@@ -519,6 +689,8 @@
             </div>
 
             <div class="page" id="page3">
+                <div class="page-left-edge"></div>
+                <div class="page-right-edge"></div>
                 <div class="page-corner"></div>
                 <div class="loading-parchment"></div>
                 <div class="page-content" data-typing>
@@ -539,6 +711,8 @@
             </div>
 
             <div class="page" id="page4">
+                <div class="page-left-edge"></div>
+                <div class="page-right-edge"></div>
                 <div class="page-corner"></div>
                 <div class="loading-parchment"></div>
                 <div class="page-content" data-typing>
@@ -570,6 +744,13 @@
         <button class="control-btn font-decrease-btn" title="Decrease Font Size" aria-label="Decrease font size"></button>
         <button class="control-btn mode-btn" title="Toggle Day/Night Mode" aria-label="Toggle night mode"></button>
         <button class="control-btn home-btn" title="Return to Cover" aria-label="Return to cover"></button>
+        <button class="control-btn resume-btn" title="Resume Reading" aria-label="Resume reading"></button>
+        <button class="control-btn progress-btn" title="Jump to Page" aria-label="Jump to page"></button>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+        <div class="progress-bar"></div>
     </div>
 
     <!-- Table of Contents -->
@@ -583,8 +764,38 @@
         <div class="toc-item" data-page="page4">The Keepers</div>
     </div>
 
+    <!-- Page Jump Modal -->
+    <div class="page-jump-modal">
+        <h3>Jump to Page</h3>
+        <input type="number" class="page-jump-input" min="1" max="4" placeholder="Enter page number">
+        <div class="page-jump-buttons">
+            <button class="page-jump-button cancel">Cancel</button>
+            <button class="page-jump-button go">Go</button>
+        </div>
+    </div>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel">
+        <h3>Reading Settings</h3>
+        <div class="setting-item">
+            <label for="typing-speed">Typing Speed</label>
+            <input type="range" id="typing-speed" min="10" max="100" value="30">
+            <div class="speed-value">Medium</div>
+        </div>
+        <div class="setting-item">
+            <label for="animation-speed">Page Turn Speed</label>
+            <input type="range" id="animation-speed" min="500" max="2000" step="100" value="1000">
+            <div class="speed-value">Normal</div>
+        </div>
+        <div class="settings-buttons">
+            <button class="settings-button cancel">Cancel</button>
+            <button class="settings-button save">Save Settings</button>
+        </div>
+    </div>
+
     <audio id="pageTurnSound" src="https://assets.mixkit.co/sfx/preview/mixkit-book-page-turn-1563.mp3" preload="auto"></audio>
     <audio id="paperSound" src="https://assets.mixkit.co/sfx/preview/mixkit-paper-whirl-1487.mp3" preload="auto"></audio>
+    <audio id="typingSound" src="https://assets.mixkit.co/sfx/preview/mixkit-keyboard-typing-1386.mp3" preload="auto"></audio>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -603,20 +814,40 @@
             const fontDecreaseBtn = document.querySelector('.font-decrease-btn');
             const modeBtn = document.querySelector('.mode-btn');
             const homeBtn = document.querySelector('.home-btn');
+            const resumeBtn = document.querySelector('.resume-btn');
+            const progressBtn = document.querySelector('.progress-btn');
             const openBookBtn = document.querySelector('.open-book-btn');
             const pageTurnSound = document.getElementById('pageTurnSound');
             const paperSound = document.getElementById('paperSound');
+            const typingSound = document.getElementById('typingSound');
             const loadingParchments = document.querySelectorAll('.loading-parchment');
+            const progressContainer = document.querySelector('.progress-container');
+            const progressBar = document.querySelector('.progress-bar');
+            const pageJumpModal = document.querySelector('.page-jump-modal');
+            const pageJumpInput = document.querySelector('.page-jump-input');
+            const pageJumpGo = document.querySelector('.page-jump-button.go');
+            const pageJumpCancel = document.querySelector('.page-jump-button.cancel');
+            const settingsPanel = document.querySelector('.settings-panel');
+            const typingSpeedInput = document.getElementById('typing-speed');
+            const animationSpeedInput = document.getElementById('animation-speed');
+            const saveSettingsBtn = document.querySelector('.settings-button.save');
+            const cancelSettingsBtn = document.querySelector('.settings-button.cancel');
+            const pageEdges = document.querySelectorAll('.page-left-edge, .page-right-edge');
+            const pageNumbers = document.querySelectorAll('.page-number');
 
             // State variables
             let currentPageIndex = 0;
             let isAnimating = false;
             let bookmarkedPage = null;
-            let fontSize = localStorage.getItem('fontSize') || 1; // Default font size multiplier
+            let fontSize = localStorage.getItem('fontSize') || 1;
             let isNightMode = localStorage.getItem('nightMode') === 'true';
+            let typingSpeed = localStorage.getItem('typingSpeed') || 30;
+            let animationSpeed = localStorage.getItem('animationSpeed') || 1000;
+            let lastReadPage = localStorage.getItem('lastPageIndex') || 0;
             let touchStartX = 0;
             let touchEndX = 0;
             let soundsEnabled = true;
+            let typingElements = [];
 
             // Initialize
             if (isNightMode) {
@@ -624,8 +855,13 @@
             }
             applyFontSize();
             updateActivePage();
-            typeTextAnimations();
             createInkStains();
+            updateProgressBar();
+            setupTypingSpeed();
+            setupAnimationSpeed();
+            
+            // Set max page number in jump input
+            pageJumpInput.max = pages.length - 1;
             
             // Event listeners
             openBookBtn.addEventListener('click', goToFirstPage);
@@ -649,6 +885,45 @@
             fontDecreaseBtn.addEventListener('click', decreaseFontSize);
             modeBtn.addEventListener('click', toggleNightMode);
             homeBtn.addEventListener('click', goToFirstPage);
+            resumeBtn.addEventListener('click', resumeReading);
+            progressBtn.addEventListener('click', showPageJumpModal);
+            pageJumpGo.addEventListener('click', jumpToPage);
+            pageJumpCancel.addEventListener('click', hidePageJumpModal);
+            progressBtn.addEventListener('click', toggleProgressBar);
+            progressContainer.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    const rect = this.getBoundingClientRect();
+                    const pos = (e.clientX - rect.left) / rect.width;
+                    const pageNum = Math.round(pos * (pages.length - 1));
+                    goToPageIndex(pageNum);
+                }
+            });
+
+            // Page edge click handlers
+            pageEdges.forEach(edge => {
+                edge.addEventListener('click', function() {
+                    if (this.classList.contains('page-left-edge')) {
+                        goToPrevPage();
+                    } else {
+                        goToNextPage();
+                    }
+                });
+            });
+
+            // Page number click handlers
+            pageNumbers.forEach(number => {
+                number.addEventListener('click', function() {
+                    const pageNum = parseInt(this.textContent);
+                    goToPageIndex(pageNum - 1); // Convert to 0-based index
+                });
+            });
+
+            // Settings panel
+            progressBtn.addEventListener('dblclick', showSettingsPanel);
+            typingSpeedInput.addEventListener('input', updateTypingSpeedDisplay);
+            animationSpeedInput.addEventListener('input', updateAnimationSpeedDisplay);
+            saveSettingsBtn.addEventListener('click', saveSettings);
+            cancelSettingsBtn.addEventListener('click', hideSettingsPanel);
 
             // Touch events for mobile swipe
             bookContainer.addEventListener('touchstart', handleTouchStart, { passive: true });
@@ -661,6 +936,9 @@
                     goToPrevPage();
                 } else if (e.key === 'ArrowRight') {
                     goToNextPage();
+                } else if (e.key === 'Escape') {
+                    hidePageJumpModal();
+                    hideSettingsPanel();
                 }
             });
 
@@ -689,6 +967,8 @@
                         loader.classList.add('active');
                         setTimeout(() => {
                             loader.classList.remove('active');
+                            // Start typing animation for this page
+                            startTypingAnimation(page);
                         }, 800);
                     } else if (index < currentPageIndex) {
                         page.classList.add('flipped');
@@ -697,9 +977,60 @@
                 
                 // Update bookmark button state
                 updateBookmarkButton();
+                updateProgressBar();
                 
                 // Store last read page
                 localStorage.setItem('lastPageIndex', currentPageIndex);
+            }
+
+            function startTypingAnimation(page) {
+                // Clear any existing typing animations
+                typingElements.forEach(el => {
+                    if (el.typingInterval) {
+                        clearInterval(el.typingInterval);
+                    }
+                });
+                typingElements = [];
+                
+                // Get all elements with data-typing attribute
+                const elements = page.querySelectorAll('[data-typing]');
+                
+                elements.forEach(el => {
+                    if (el.dataset.typed) return; // Skip if already typed
+                    
+                    const originalText = el.textContent;
+                    el.textContent = '';
+                    el.style.visibility = 'visible';
+                    
+                    let i = 0;
+                    const speed = parseInt(typingSpeed) + (Math.random() * 20 - 10);
+                    const typingObj = { element: el, typingInterval: null };
+                    typingElements.push(typingObj);
+                    
+                    const type = () => {
+                        if (i < originalText.length) {
+                            el.textContent += originalText.charAt(i);
+                            i++;
+                            
+                            // Play typing sound randomly
+                            if (soundsEnabled && Math.random() > 0.7) {
+                                try {
+                                    typingSound.currentTime = 0;
+                                    typingSound.volume = 0.1;
+                                    typingSound.play();
+                                } catch (e) {
+                                    console.log("Audio error:", e);
+                                }
+                            }
+                            
+                            typingObj.typingInterval = setTimeout(type, speed);
+                        } else {
+                            el.dataset.typed = "true";
+                        }
+                    };
+                    
+                    type();
+                });
             }
 
             function goToPrevPage() {
@@ -719,7 +1050,7 @@
                     currentPage.classList.add('flipped');
                     currentPageIndex--;
                     isAnimating = false;
-                }, 1000);
+                }, animationSpeed);
             }
 
             function goToNextPage() {
@@ -745,17 +1076,29 @@
             function goToPage(pageId) {
                 const pageIndex = Array.from(pages).findIndex(page => page.id === pageId);
                 if (pageIndex !== -1 && pageIndex !== currentPageIndex) {
-                    playPageTurnSound();
-                    currentPageIndex = pageIndex;
-                    updateActivePage();
+                    goToPageIndex(pageIndex);
                 }
+            }
+
+            function goToPageIndex(pageIndex) {
+                if (pageIndex < 0 || pageIndex >= pages.length) return;
+                
+                playPageTurnSound();
+                currentPageIndex = pageIndex;
+                updateActivePage();
+                hidePageJumpModal();
             }
 
             function goToFirstPage() {
                 if (currentPageIndex !== 0) {
-                    playPageTurnSound();
-                    currentPageIndex = 0;
-                    updateActivePage();
+                    goToPageIndex(0);
+                }
+            }
+
+            function resumeReading() {
+                const lastPage = localStorage.getItem('lastPageIndex');
+                if (lastPage && lastPage > 0) {
+                    goToPageIndex(parseInt(lastPage));
                 }
             }
 
@@ -854,33 +1197,6 @@
                 }
             }
 
-            function typeTextAnimations() {
-                const elements = document.querySelectorAll('[data-typing]');
-                
-                elements.forEach(el => {
-                    const text = el.textContent;
-                    el.textContent = '';
-                    el.style.visibility = 'visible';
-                    
-                    let i = 0;
-                    const speed = el.dataset.typingSpeed || 30;
-                    const variance = Math.random() * 20 - 10;
-                    
-                    const type = () => {
-                        if (i < text.length) {
-                            // Simulate irregular writing speed
-                            const delay = speed + variance + (Math.random() * 20);
-                            
-                            el.textContent += text.charAt(i);
-                            i++;
-                            setTimeout(type, delay);
-                        }
-                    };
-                    
-                    type();
-                });
-            }
-
             function createInkStains() {
                 // Add random ink stains to pages
                 const pagesWithContent = document.querySelectorAll('.page-content');
@@ -934,17 +1250,96 @@
                 }
             }
 
-            // Check for bookmarked page or last read page
+            function updateProgressBar() {
+                const progress = (currentPageIndex / (pages.length - 1)) * 100;
+                progressBar.style.width = `${progress}%`;
+            }
+
+            function toggleProgressBar() {
+                progressContainer.style.display = progressContainer.style.display === 'block' ? 'none' : 'block';
+                playPaperSound();
+            }
+
+            function showPageJumpModal() {
+                pageJumpInput.value = currentPageIndex + 1; // Show 1-based index
+                pageJumpModal.style.display = 'block';
+                playPaperSound();
+            }
+
+            function hidePageJumpModal() {
+                pageJumpModal.style.display = 'none';
+            }
+
+            function jumpToPage() {
+                const pageNum = parseInt(pageJumpInput.value);
+                if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= pages.length) {
+                    goToPageIndex(pageNum - 1); // Convert to 0-based index
+                }
+            }
+
+            function showSettingsPanel() {
+                typingSpeedInput.value = typingSpeed;
+                animationSpeedInput.value = animationSpeed;
+                updateTypingSpeedDisplay();
+                updateAnimationSpeedDisplay();
+                settingsPanel.style.display = 'block';
+                playPaperSound();
+            }
+
+            function hideSettingsPanel() {
+                settingsPanel.style.display = 'none';
+            }
+
+            function updateTypingSpeedDisplay() {
+                const speed = parseInt(typingSpeedInput.value);
+                let speedText = '';
+                if (speed < 20) speedText = 'Very Fast';
+                else if (speed < 40) speedText = 'Fast';
+                else if (speed < 60) speedText = 'Medium';
+                else if (speed < 80) speedText = 'Slow';
+                else speedText = 'Very Slow';
+                
+                typingSpeedInput.nextElementSibling.textContent = speedText;
+            }
+
+            function updateAnimationSpeedDisplay() {
+                const speed = parseInt(animationSpeedInput.value);
+                let speedText = '';
+                if (speed < 800) speedText = 'Fast';
+                else if (speed < 1200) speedText = 'Normal';
+                else speedText = 'Slow';
+                
+                animationSpeedInput.nextElementSibling.textContent = speedText;
+            }
+
+            function saveSettings() {
+                typingSpeed = parseInt(typingSpeedInput.value);
+                animationSpeed = parseInt(animationSpeedInput.value);
+                localStorage.setItem('typingSpeed', typingSpeed);
+                localStorage.setItem('animationSpeed', animationSpeed);
+                hideSettingsPanel();
+                playPaperSound();
+            }
+
+            function setupTypingSpeed() {
+                if (localStorage.getItem('typingSpeed')) {
+                    typingSpeed = parseInt(localStorage.getItem('typingSpeed'));
+                }
+                document.documentElement.style.setProperty('--typing-speed', `${typingSpeed}ms`);
+            }
+
+            function setupAnimationSpeed() {
+                if (localStorage.getItem('animationSpeed')) {
+                    animationSpeed = parseInt(localStorage.getItem('animationSpeed'));
+                }
+                // Animation speed is applied in the goToPrevPage/goToNextPage functions
+            }
+
+            // Check for bookmarked page
             const savedBookmark = localStorage.getItem('bookmarkedPage');
             if (savedBookmark) {
                 bookmarkedPage = parseInt(savedBookmark);
                 updateBookmarkButton();
-            }
-
-            const lastPage = localStorage.getItem('lastPageIndex');
-            if (lastPage && lastPage > 0) {
-                currentPageIndex = parseInt(lastPage);
-                updateActivePage();
             }
         });
     </script>
