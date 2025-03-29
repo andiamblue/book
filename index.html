@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ancient Tome Reader</title>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f5e7d0;
+            --text-color: #3a3226;
+            --page-color: #f8f1e0;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --highlight-color: #e8d9b5;
+            --nav-btn-color: #5d4c3a;
+        }
+
+        .night-mode {
+            --bg-color: #1a1a1a;
+            --text-color: #d9d1c7;
+            --page-color: #2a2620;
+            --shadow-color: rgba(0, 0, 0, 0.6);
+            --highlight-color: #3a3226;
+            --nav-btn-color: #8a7a66;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Caveat', cursive;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            background-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M0 0 L100 0 L100 100 L0 100 Z" fill="none" stroke="%233a3226" stroke-width="0.5" stroke-opacity="0.1" /></svg>');
+            background-size: 200px;
+            overflow-x: hidden;
+            transition: background-color 0.5s, color 0.5s;
+        }
+
+        .book-container {
+            position: relative;
+            width: 90%;
+            max-width: 900px;
+            height: 80vh;
+            margin: 5vh auto;
+            perspective: 2000px;
+        }
+
+        .book {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+        }
+
+        .page {
+            position: absolute;
+            width: 50%;
+            height: 100%;
+            top: 0;
+            left: 50%;
+            transform-origin: left center;
+            transform-style: preserve-3d;
+            transition: transform 1s;
+            background-color: var(--page-color);
+            background-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M0 0 L100 0 L100 100 L0 100 Z" fill="none" stroke="%233a3226" stroke-width="0.5" stroke-opacity="0.1" /></svg>');
+            background-size: 200px;
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.1), 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border-radius: 2px 8px 8px 2px;
+        }
+
+        .page-content {
+            padding: 40px;
+            height: 100%;
+            overflow-y: auto;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .page.active .page-content {
+            opacity: 1;
+        }
+
+        .page-number {
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            font-size: 14px;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        .page-cover {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #5d4c3a;
+            background-image: linear-gradient(to right, #3a3226, #5d4c3a);
+            color: #e8d9b5;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px;
+            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
+            border-radius: 5px 15px 15px 5px;
+            z-index: 10;
+        }
+
+        .page-cover h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .page-cover p {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+
+        .open-book-btn {
+            background-color: #e8d9b5;
+            color: #3a3226;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Caveat', cursive;
+            font-size: 1.2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .open-book-btn:hover {
+            background-color: #d9c9a3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 80px;
+            background-color: var(--nav-btn-color);
+            color: var(--highlight-color);
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 5px;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        .nav-btn:hover {
+            opacity: 1;
+        }
+
+        .prev-btn {
+            left: 10px;
+        }
+
+        .next-btn {
+            right: 10px;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+            background-color: rgba(58, 50, 38, 0.8);
+            padding: 10px;
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .control-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--highlight-color);
+            color: var(--nav-btn-color);
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .toc-btn::after {
+            content: "≡";
+        }
+
+        .bookmark-btn::after {
+            content: "🔖";
+        }
+
+        .font-increase-btn::after {
+            content: "A+";
+        }
+
+        .font-decrease-btn::after {
+            content: "A-";
+        }
+
+        .mode-btn::after {
+            content: "☽";
+        }
+
+        .night-mode .mode-btn::after {
+            content: "☀";
+        }
+
+        .home-btn::after {
+            content: "⌂";
+        }
+
+        .toc-panel {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100vh;
+            background-color: var(--page-color);
+            box-shadow: 2px 0 10px var(--shadow-color);
+            z-index: 2000;
+            transition: transform 0.3s;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .toc-panel.active {
+            transform: translateX(300px);
+        }
+
+        .toc-item {
+            padding: 10px 0;
+            border-bottom: 1px dashed rgba(58, 50, 38, 0.3);
+            cursor: pointer;
+        }
+
+        .toc-item:hover {
+            color: var(--highlight-color);
+        }
+
+        .toc-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
+
+        .mobile-nav-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--nav-btn-color);
+            color: var(--highlight-color);
+            border: none;
+            font-size: 20px;
+            margin: 0 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background-color: var(--text-color);
+            animation: blink 1s infinite;
+            vertical-align: middle;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .book-container {
+                width: 100%;
+                height: 90vh;
+                margin: 5vh auto;
+            }
+
+            .page-content {
+                padding: 20px;
+            }
+
+            .nav-btn {
+                display: none;
+            }
+
+            .mobile-nav {
+                display: flex;
+            }
+
+            .controls {
+                bottom: 10px;
+                padding: 8px;
+            }
+
+            .control-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 14px;
+            }
+        }
+
+        /* Page flip animation classes */
+        .page.flipping {
+            transform: rotateY(-160deg);
+            z-index: 100;
+            box-shadow: -5px 5px 20px var(--shadow-color);
+        }
+
+        .page.flipped {
+            transform: rotateY(-180deg);
+            z-index: 0;
+        }
+
+        .page.active {
+            z-index: 10;
+        }
+
+        /* Book spine effect */
+        .book::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 10px;
+            height: 100%;
+            background: linear-gradient(to right, #3a3226, #5d4c3a, #3a3226);
+            transform: translateX(-50%);
+            z-index: 5;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="book-container">
+        <div class="book">
+            <!-- Cover Page -->
+            <div class="page page-cover active" id="cover">
+                <h1>The Ancient Tome</h1>
+                <p>Mysteries of a Forgotten Era</p>
+                <button class="open-book-btn">Open Book</button>
+            </div>
+
+            <!-- Example Pages -->
+            <div class="page" id="page1">
+                <div class="page-content">
+                    <h2>Chapter One: The Beginning</h2>
+                    <p>In the days of old, when the world was young and magic flowed like rivers through the land, there existed a kingdom hidden among the clouds. Its people lived in harmony with the elements, drawing power from the very air they breathed.</p>
+                    <p>The wise rulers of this kingdom kept a sacred tome, filled with knowledge from ages past. This book, bound in dragonhide and inked with starlight, contained secrets that could shape the destiny of worlds.</p>
+                </div>
+                <div class="page-number">1</div>
+            </div>
+
+            <div class="page" id="page2">
+                <div class="page-content">
+                    <h2>The First Prophecy</h2>
+                    <p>As foretold by the seers of yore, a time would come when the balance would shift. The stars would align in the constellation of the Serpent, and the gates between worlds would tremble.</p>
+                    <p>"When the silver moon eclipses the golden sun, and the seven bells toll in the hollow tower, the keeper of the tome shall rise from among the unmarked graves."</p>
+                    <p>This prophecy, written in the tongue of the ancients, was said to hold the key to preventing the great unraveling.</p>
+                </div>
+                <div class="page-number">2</div>
+            </div>
+
+            <div class="page" id="page3">
+                <div class="page-content">
+                    <h2>The Lost Artifacts</h2>
+                    <p>Scattered across the realms were seven artifacts of immense power:</p>
+                    <ol>
+                        <li>The Crown of Twilight</li>
+                        <li>The Scepter of the Deep</li>
+                        <li>The Chalice of Dawn</li>
+                        <li>The Mirror of Echoes</li>
+                        <li>The Locket of Shadows</li>
+                        <li>The Key of the Last Door</li>
+                        <li>The Tome of Endings (this very book)</li>
+                    </ol>
+                    <p>When brought together, these items could either mend the fabric of reality or tear it asunder, depending on the hands that wielded them.</p>
+                </div>
+                <div class="page-number">3</div>
+            </div>
+
+            <div class="page" id="page4">
+                <div class="page-content">
+                    <h2>The Keepers</h2>
+                    <p>For generations, a secret order guarded the tome, passing it down from master to apprentice in an unbroken chain. Each keeper added their own knowledge to its pages, but also their own protections.</p>
+                    <p>The current keeper, an old woman who lived in the ruins of the cloud kingdom, could often be heard whispering to the book as if it could answer. Some said it did.</p>
+                    <p>Her eyes, milky with age but sharp with wisdom, had seen the patterns of fate woven through time. She knew the hour was approaching when the tome would need to choose its next bearer.</p>
+                </div>
+                <div class="page-number">4</div>
+            </div>
+
+            <!-- More pages would continue here... -->
+        </div>
+    </div>
+
+    <!-- Desktop Navigation -->
+    <button class="nav-btn prev-btn">‹</button>
+    <button class="nav-btn next-btn">›</button>
+
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav">
+        <button class="mobile-nav-btn prev-btn">‹</button>
+        <button class="mobile-nav-btn next-btn">›</button>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+        <button class="control-btn toc-btn" title="Table of Contents"></button>
+        <button class="control-btn bookmark-btn" title="Bookmark Page"></button>
+        <button class="control-btn font-increase-btn" title="Increase Font Size"></button>
+        <button class="control-btn font-decrease-btn" title="Decrease Font Size"></button>
+        <button class="control-btn mode-btn" title="Toggle Day/Night Mode"></button>
+        <button class="control-btn home-btn" title="Return to Cover"></button>
+    </div>
+
+    <!-- Table of Contents -->
+    <div class="toc-panel">
+        <div class="toc-close">×</div>
+        <h3>Table of Contents</h3>
+        <div class="toc-item" data-page="cover">Cover</div>
+        <div class="toc-item" data-page="page1">Chapter 1: The Beginning</div>
+        <div class="toc-item" data-page="page2">The First Prophecy</div>
+        <div class="toc-item" data-page="page3">The Lost Artifacts</div>
+        <div class="toc-item" data-page="page4">The Keepers</div>
+        <!-- More TOC items would be added here -->
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
+            const bookContainer = document.querySelector('.book-container');
+            const book = document.querySelector('.book');
+            const pages = document.querySelectorAll('.page');
+            const prevBtns = document.querySelectorAll('.prev-btn');
+            const nextBtns = document.querySelectorAll('.next-btn');
+            const tocBtn = document.querySelector('.toc-btn');
+            const tocPanel = document.querySelector('.toc-panel');
+            const tocClose = document.querySelector('.toc-close');
+            const tocItems = document.querySelectorAll('.toc-item');
+            const bookmarkBtn = document.querySelector('.bookmark-btn');
+            const fontIncreaseBtn = document.querySelector('.font-increase-btn');
+            const fontDecreaseBtn = document.querySelector('.font-decrease-btn');
+            const modeBtn = document.querySelector('.mode-btn');
+            const homeBtn = document.querySelector('.home-btn');
+            const openBookBtn = document.querySelector('.open-book-btn');
+
+            // State variables
+            let currentPageIndex = 0;
+            let isAnimating = false;
+            let bookmarkedPage = null;
+            let fontSize = 1; // Default font size multiplier
+            let touchStartX = 0;
+            let touchEndX = 0;
+
+            // Initialize
+            updateActivePage();
+            typeTextAnimations();
+            
+            // Event listeners
+            openBookBtn.addEventListener('click', goToFirstPage);
+            
+            prevBtns.forEach(btn => btn.addEventListener('click', goToPrevPage));
+            nextBtns.forEach(btn => btn.addEventListener('click', goToNextPage));
+            
+            tocBtn.addEventListener('click', toggleToc);
+            tocClose.addEventListener('click', toggleToc);
+            
+            tocItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const pageId = this.getAttribute('data-page');
+                    goToPage(pageId);
+                    toggleToc();
+                });
+            });
+            
+            bookmarkBtn.addEventListener('click', toggleBookmark);
+            fontIncreaseBtn.addEventListener('click', increaseFontSize);
+            fontDecreaseBtn.addEventListener('click', decreaseFontSize);
+            modeBtn.addEventListener('click', toggleNightMode);
+            homeBtn.addEventListener('click', goToFirstPage);
+
+            // Touch events for mobile swipe
+            bookContainer.addEventListener('touchstart', handleTouchStart, false);
+            bookContainer.addEventListener('touchend', handleTouchEnd, false);
+
+            // Keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowLeft') {
+                    goToPrevPage();
+                } else if (e.key === 'ArrowRight') {
+                    goToNextPage();
+                }
+            });
+
+            // Functions
+            function updateActivePage() {
+                pages.forEach((page, index) => {
+                    page.classList.remove('active');
+                    if (index === currentPageIndex) {
+                        page.classList.add('active');
+                    }
+                });
+            }
+
+            function goToPrevPage() {
+                if (isAnimating || currentPageIndex <= 0) return;
+                
+                isAnimating = true;
+                const currentPage = pages[currentPageIndex];
+                const prevPage = pages[currentPageIndex - 1];
+                
+                currentPage.classList.add('flipping');
+                prevPage.classList.add('active');
+                
+                setTimeout(() => {
+                    currentPage.classList.remove('active');
+                    currentPage.classList.remove('flipping');
+                    currentPage.classList.add('flipped');
+                    currentPageIndex--;
+                    isAnimating = false;
+                }, 1000);
+            }
+
+            function goToNextPage() {
+                if (isAnimating || currentPageIndex >= pages.length - 1) return;
+                
+                isAnimating = true;
+                const currentPage = pages[currentPageIndex];
+                const nextPage = pages[currentPageIndex + 1];
+                
+                nextPage.classList.add('active');
+                
+                if (currentPageIndex > 0) {
+                    const prevPage = pages[currentPageIndex - 1];
+                    prevPage.classList.remove('flipped');
+                }
+                
+                currentPageIndex++;
+                isAnimating = false;
+                updateActivePage();
+            }
+
+            function goToPage(pageId) {
+                const pageIndex = Array.from(pages).findIndex(page => page.id === pageId);
+                if (pageIndex !== -1 && pageIndex !== currentPageIndex) {
+                    currentPageIndex = pageIndex;
+                    updateActivePage();
+                }
+            }
+
+            function goToFirstPage() {
+                currentPageIndex = 0;
+                updateActivePage();
+            }
+
+            function toggleToc() {
+                tocPanel.classList.toggle('active');
+            }
+
+            function toggleBookmark() {
+                if (bookmarkedPage === currentPageIndex) {
+                    bookmarkedPage = null;
+                    bookmarkBtn.style.backgroundColor = 'var(--highlight-color)';
+                } else {
+                    bookmarkedPage = currentPageIndex;
+                    bookmarkBtn.style.backgroundColor = '#8a7a66';
+                }
+            }
+
+            function increaseFontSize() {
+                if (fontSize < 1.5) {
+                    fontSize += 0.1;
+                    document.querySelectorAll('.page-content').forEach(content => {
+                        content.style.fontSize = `${fontSize}em`;
+                    });
+                }
+            }
+
+            function decreaseFontSize() {
+                if (fontSize > 0.7) {
+                    fontSize -= 0.1;
+                    document.querySelectorAll('.page-content').forEach(content => {
+                        content.style.fontSize = `${fontSize}em`;
+                    });
+                }
+            }
+
+            function toggleNightMode() {
+                document.body.classList.toggle('night-mode');
+            }
+
+            function handleTouchStart(e) {
+                touchStartX = e.changedTouches[0].screenX;
+            }
+
+            function handleTouchEnd(e) {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }
+
+            function handleSwipe() {
+                const difference = touchStartX - touchEndX;
+                if (difference > 50) {
+                    goToNextPage();
+                } else if (difference < -50) {
+                    goToPrevPage();
+                }
+            }
+
+            function typeTextAnimations() {
+                const paragraphs = document.querySelectorAll('.page-content p, .page-content li');
+                
+                paragraphs.forEach(p => {
+                    const text = p.textContent;
+                    p.textContent = '';
+                    
+                    let i = 0;
+                    const typingEffect = setInterval(() => {
+                        if (i < text.length) {
+                            p.textContent += text.charAt(i);
+                            i++;
+                        } else {
+                            clearInterval(typingEffect);
+                        }
+                    }, 30);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
